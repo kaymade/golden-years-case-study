@@ -1,161 +1,74 @@
 # Golden Years Tech Help
 
-A technical case study documenting the architecture, workflows, integrations, security decisions, and engineering behind a production website and internal CRM built for Golden Years Tech Help.
+A production website and internal operations CRM built for a senior-focused technology support business.
 
 [View the public website](https://www.goldenyearsth.com/)
 
-> The production source code is intentionally maintained in a private repository because the application contains proprietary business workflows, internal operational tooling, security-sensitive configuration, and systems that process customer information.
+> The production repository is private because the application contains proprietary business workflows, internal tooling, security-sensitive configuration, and systems that process customer information.
 >
-> This repository documents the system without exposing production source code, credentials, customer data, or private business information.
+> This case study documents the architecture and engineering without exposing production source code, credentials, or private business data.
 
 ## Overview
 
-Golden Years Tech Help is a senior-focused technology support business.
+Golden Years Tech Help needed more than a marketing website.
 
-I designed and built both the customer-facing website and the authenticated internal CRM used to manage the operational workflow behind incoming service requests.
+Customers needed a straightforward way to request technology assistance, while staff needed a central system for managing intake, scheduling, technician assignments, customer history, communication, billing, payments, and operational records.
 
-The application turns a public appointment request into a trackable workflow spanning intake, service tickets, scheduling, technician assignment, customer history, communication, billing, payment processing, calendar synchronization, and audit history.
+I designed and built both the public website and the authenticated CRM that supports that workflow.
 
-I was the sole code contributor to the production repository and also handled the majority of the project's technical infrastructure and deployment.
+I was the sole code contributor to the production repository and handled the majority of the project's technical implementation and infrastructure, including:
 
-The system was built as a production business application rather than a portfolio demonstration.
+- application and workflow design
+- public website and CRM development
+- website copy
+- PostgreSQL schema and migrations
+- authentication and Row Level Security
+- Supabase Edge Functions
+- Google Calendar integration
+- Resend email integration
+- Stripe CRM integration
+- Netlify and Supabase configuration
+- DNS and production-domain configuration
+- Google Workspace setup required for calendar integration
+- production secrets
+- testing and CI
+- deployment hardening
+- production launch testing and maintenance
 
-## Project Scope
+The business owners supplied the existing brand identity, logo, business accounts, and core business needs. They also provided input on areas such as staff roles and permissions.
 
-Golden Years contains two primary user-facing surfaces within one production codebase.
+The broader operational model was designed by me and refined with the owners through conversation, implementation, testing, and review.
 
-### Public Website
+## Technology
 
-A customer-facing website used to:
+| Area | Technology |
+| --- | --- |
+| Frontend | HTML5, CSS, Vanilla JavaScript |
+| Backend | Supabase Edge Functions, TypeScript, Deno |
+| Data | PostgreSQL, Supabase RPC, Realtime |
+| Authentication | Supabase Auth |
+| Authorization | PostgreSQL Row Level Security |
+| Integrations | Google Calendar API, Stripe, Resend |
+| Hosting | Netlify |
+| Tooling | Git, GitHub, GitHub Actions, Supabase CLI, `html-validate` |
+| Background Work | PostgreSQL `pg_cron`, `pg_net`, Supabase Vault |
 
-- discover available services;
-- understand how Golden Years works;
-- request technology assistance;
-- select the type of service needed;
-- provide device and issue information;
-- choose a preferred appointment date and time;
-- provide contact and visit information; and
-- submit a structured service request.
-
-The public site also includes production-oriented discoverability work, including page-specific titles and descriptions, canonical URLs, `robots.txt`, a sitemap, Open Graph metadata, and structured JSON-LD on key pages.
-
-Images use explicit dimensions, and non-hero imagery uses lazy loading to support predictable layout and page performance.
-
-![Golden Years Tech Help public homepage](screenshots/public-homepage.png)
-
-*The customer-facing homepage emphasizes plain-language service information, clear navigation, and direct appointment and contact actions.*
-
-#### Service Discovery
-
-Customers can browse service categories before opening the appointment workflow. Selecting a category carries that service choice into the request process.
-
-![Golden Years service chooser](screenshots/service-chooser.png)
-
-*Service discovery is organized around common technology problems rather than technical terminology, helping customers identify the type of help they need.*
-
-### Internal CRM
-
-An authenticated operations application used by staff to manage:
-
-- leads;
-- customer profiles;
-- service tickets;
-- technician assignments;
-- scheduling;
-- service status and outcomes;
-- notes;
-- customer communication;
-- billing;
-- card payments;
-- invoices and receipts;
-- audit history;
-- staff access and organizational scope;
-- calendars; and
-- operational exports.
-
-All CRM screenshots in this case study use fictional, seeded, or sanitized data. No real customer records, private staff information, communications, schedules, payment identifiers, credentials, provider identifiers, or private operational data are published.
-
-## My Role
-
-The business owners approached me with the underlying business need, existing Golden Years branding and logo, and their requirements for how different staff roles should operate.
-
-From there, I designed the general software system and operational workflow.
-
-My responsibilities included:
-
-- gathering requirements directly from the business owners;
-- translating business needs into software workflows;
-- designing the CRM's operational policies and processes;
-- iterating on those workflows with the owners;
-- defining practical acceptance criteria through conversation, implementation, and testing;
-- writing the public website copy;
-- designing and implementing the public website;
-- designing and implementing the CRM;
-- designing the PostgreSQL schema;
-- writing and maintaining database migrations;
-- designing Row Level Security policies;
-- implementing authentication and role-aware access;
-- creating database functions and triggers;
-- developing Supabase Edge Functions;
-- implementing Google Calendar integration;
-- implementing Resend email integration;
-- implementing the CRM-side Stripe payment integration;
-- configuring Supabase;
-- configuring Netlify;
-- configuring Resend;
-- configuring DNS and production domain behavior;
-- configuring the Google Workspace environment required by the Calendar integration;
-- configuring production secrets;
-- implementing testing and CI verification;
-- hardening the deployment process;
-- testing the production application before launch; and
-- maintaining the software through its recorded release history.
-
-The owners retained responsibility for the business itself and supplied the existing brand identity, Google Workspace account, domain, and Stripe business account.
-
-For Stripe, I was added as a developer and implemented/configured the application's Stripe integration rather than administering every business-level Stripe account setting.
-
-## Requirements + Operational Design
-
-The business owners provided the core business needs and gave input on areas such as staff permissions and organizational roles.
-
-The broader operational model was designed by me and reviewed with the owners throughout development.
-
-That included decisions around:
-
-- the lead-to-customer lifecycle;
-- how service tickets should be created and retained;
-- staff and technician permissions;
-- assignment workflows;
-- appointment states;
-- scheduling behavior;
-- customer history;
-- communication tracking;
-- billing and payment state;
-- audit history;
-- record deletion and archival safeguards; and
-- the relationship between CRM state and external systems.
-
-Formal written acceptance criteria were not supplied at the beginning of the project.
-
-Instead, acceptance criteria evolved collaboratively through requirements conversations, implementation, client review, testing, and iteration.
-
-A feature was considered ready when the business workflow behaved correctly for the client and its technical dependencies operated as expected.
+The production system includes **18 core application tables, 46 applied database migrations, 13 deployed Edge Functions, six staff roles, and 28 automated Edge Function tests**.
 
 ## Architecture
 
-The system uses a static browser frontend with Supabase providing the primary application backend.
+The browser application is deployed through Netlify while Supabase provides the relational database, authentication, authorization, Realtime updates, RPC functions, and privileged server-side functions.
 
 ```mermaid
 flowchart TD
     Customer[Customer Browser]
     Staff[Staff Browser]
 
-    Public[Netlify Public Site]
-    CRM[Netlify CRM]
+    Public[Public Website]
+    CRM[Internal CRM]
 
     Auth[Supabase Auth]
-    Functions[Supabase Edge Functions]
+    Functions[Edge Functions]
     DB[(PostgreSQL)]
     Realtime[Supabase Realtime]
 
@@ -179,744 +92,365 @@ flowchart TD
     Functions --> Stripe
 ```
 
-Privileged external-service credentials and sensitive integration logic remain server-side rather than being shipped to the browser.
+Business logic is divided between the browser, PostgreSQL, and Edge Functions.
 
-Business logic is distributed intentionally across:
+The browser handles interface behavior and ordinary application state. PostgreSQL enforces relational workflows, permissions, constraints, and transactional operations. Edge Functions handle privileged workflows and external services so sensitive credentials are not shipped to the client.
 
-- browser JavaScript for UI behavior and ordinary application state;
-- PostgreSQL for transactional workflows, constraints, access rules, and data integrity; and
-- Edge Functions for privileged operations and external API integration.
+## Public Experience
 
-## Technology
+The public site explains Golden Years' services in plain language and gives customers a structured way to request help.
 
-### Frontend
+![Golden Years Tech Help public homepage](screenshots/public-homepage.png)
 
-- HTML5
-- CSS
-- Vanilla JavaScript
-- Responsive interface design
-- Accessible interaction patterns
+Customers can browse service categories based on common technology problems rather than needing to know technical terminology.
 
-### Backend + Data
+![Golden Years service chooser](screenshots/service-chooser.png)
 
-- PostgreSQL
-- Supabase
-- Supabase Auth
-- Row Level Security
-- Supabase Realtime
-- Supabase RPC
-- Supabase Edge Functions
-- TypeScript
-- Deno
+The booking workflow collects:
 
-### Integrations
-
-- Google Calendar API
-- Stripe.js
-- Stripe Payment Intents
-- Stripe webhooks
-- Resend
-- Resend webhooks
-
-### Infrastructure + Tooling
-
-- Netlify
-- Git
-- GitHub
-- GitHub Actions
-- Supabase CLI
-- Node.js for development and CI tooling
-- `html-validate`
-- PostgreSQL `pg_cron`
-- PostgreSQL `pg_net`
-- Supabase Vault
-- automated Deno testing
-
-## By the Numbers
-
-The production codebase includes:
-
-- 10 public HTML pages
-- 8 administrator CRM modules
-- 5 technician CRM modules
-- 18 core application tables
-- 46 database migrations
-- 13 deployed Edge Functions
-- 6 staff roles
-- 6 lead/ticket workflow statuses
-- 15 public service categories
-- 28 automated Edge Function tests
-
-These figures describe the technical scope of the application rather than business performance metrics.
-
-## Public Booking Workflow
-
-The public site allows customers to submit structured appointment requests including:
-
-- name;
-- phone;
-- optional email;
-- optional address and ZIP;
-- selected service;
-- optional device information;
-- preferred date;
-- preferred half-hour time;
-- visit type;
-- who the appointment is for;
-- issue description; and
-- contact consent.
-
-Validation occurs both in the browser and server-side.
-
-### Appointment Request Interface
+- contact information
+- service and device information
+- preferred appointment date and time
+- visit type
+- who the service is for
+- issue description
+- contact consent
 
 ![Golden Years appointment request form](screenshots/appointment-request-form.png)
 
-*The public request form collects structured contact, service, device, scheduling, visit, and issue information while keeping the workflow readable and straightforward.*
+Validation occurs in both the browser and the server-side intake function.
 
-The final stage of the request also includes contact consent, a short explanation of what happens next, and a human-verification challenge used as part of the public intake protections.
+The final stage also includes consent messaging and a human-verification challenge as part of the application's public intake protections.
 
-![Golden Years appointment request consent and human verification](screenshots/appointment-request-human-check.png)
+![Golden Years booking consent and human verification](screenshots/appointment-request-human-check.png)
 
-*Consent and human-verification controls are integrated directly into the booking workflow rather than handled as separate administrative steps.*
+A valid submission creates a lead and linked service ticket, then queues the related calendar and email workflows.
 
-After a valid submission:
+The public site also includes canonical URLs, page-specific metadata, Open Graph data, `robots.txt`, a sitemap, JSON-LD on key pages, responsive layouts, and accessibility-oriented interaction patterns.
 
-1. the request is persisted as a lead;
-2. a linked service ticket is created;
-3. a tentative calendar operation is queued;
-4. business notification email is queued;
-5. customer confirmation email is queued when an email address is supplied; and
-6. staff can begin the internal service workflow.
+## Service + Customer Workflow
 
-Downstream integrations use durable background processing so temporary external-service failures do not cause the original customer request to disappear.
-
-## Data Model
-
-The application models the service lifecycle as related business entities rather than storing each booking as an isolated form submission.
+The application's data model keeps the initial service request separate from a durable customer profile.
 
 ```mermaid
 flowchart LR
+    Request[Public Request]
     Lead[Lead]
     Ticket[Service Ticket]
     Customer[Customer Profile]
-    Tech[Technician / Staff]
-    Notes[Notes + Messages]
-    Billing[Billing + Payments]
-
-    Lead --> Ticket
-    Lead -->|Explicit conversion| Customer
-    Customer --> Ticket
-    Tech --> Ticket
-    Ticket --> Notes
-    Customer --> Notes
-    Ticket --> Billing
-    Customer --> Billing
-```
-
-A lead receives a linked service ticket immediately.
-
-Creation of a durable customer profile remains an explicit staff operation.
-
-One customer may have multiple tickets over time.
-
-### Customer Records + Service History
-
-![Golden Years customer profile](screenshots/customer-profile.png)
-
-*Customer profiles centralize contact actions, billing, ticket creation, archival controls, and long-term account information.*
-
-A customer can retain multiple service cases over time rather than losing prior visits when a new request is created.
-
-![Golden Years customer ticket history](screenshots/customer-ticket-history.png)
-
-*Ticket history preserves scheduling, assignment, billing state, visit type, device information, priority, issue context, and service outcomes across customer interactions.*
-
-This separation prevents the application from silently treating people as the same customer merely because they share a phone number or email address.
-
-## Service Workflow
-
-A simplified service lifecycle looks like:
-
-```mermaid
-flowchart TD
-    Request[Customer submits request]
-    Lead[Lead created]
-    Ticket[Linked ticket created]
-    Review[Staff reviews request]
-    Assign[Technician assigned]
-    Schedule[Appointment scheduled]
-    Progress[Service in progress]
-    Complete[Completed or canceled]
-    Convert[Customer profile conversion]
-    Billing[Billing / payment]
-    Follow[Follow-up / archive]
+    Service[Service Workflow]
+    Billing[Billing / Payment]
 
     Request --> Lead
     Lead --> Ticket
-    Ticket --> Review
-    Review --> Assign
-    Assign --> Schedule
-    Schedule --> Progress
-    Progress --> Complete
-    Complete --> Convert
-    Complete --> Billing
-    Complete --> Follow
+    Lead -->|Explicit conversion| Customer
+    Customer --> Ticket
+    Ticket --> Service
+    Service --> Billing
 ```
 
-### Lead Intake + Case Detail
+A lead receives a ticket immediately, but customer creation remains an explicit staff action.
 
-A submitted request becomes a lead with its own case reference and scheduling context.
+This was intentional. Automatically matching people based only on a phone number or email can incorrectly merge unrelated customers who share contact information.
 
-![Golden Years lead detail overview](screenshots/lead-detail-overview.png)
+A customer can then retain multiple service tickets over time.
 
-*Lead details preserve the original contact information, service request, preferred appointment time, priority, calendar state, and issue description.*
-
-Staff can then update the operational fields used to move the request through the service process.
-
-![Golden Years lead assignment controls](screenshots/lead-assignment-controls.png)
-
-*Administrative controls allow staff to update status, priority, technician assignment, and internal service context.*
-
-The same lead record also provides communication and conversion actions while preserving internal notes and customer communication history.
-
-![Golden Years lead actions and notes](screenshots/lead-detail-actions-notes.png)
-
-*Lead actions connect contact, email, internal notes, and explicit customer conversion to the same service case.*
-
-### Ticket Management
-
-Service tickets represent the operational case being worked after intake and remain linked to the originating service request.
-
-![Golden Years ticket detail](screenshots/ticket-detail.png)
-
-*Ticket records preserve case status, technician assignment, scheduling information, priority, and historical state.*
-
-Staff can update scheduling, workflow status, payment state, archival state, and visit outcome directly from the ticket workflow.
-
-![Golden Years ticket update controls](screenshots/ticket-update-controls.png)
-
-*Ticket controls connect scheduling and service progress with billing state and recorded visit outcomes.*
-
-The system intentionally distinguishes between:
-
-- a customer's preferred appointment time;
-- tentative scheduling;
-- technician assignment; and
-- a confirmed working schedule.
-
-That distinction allows staff to review and coordinate a request before treating it as a confirmed appointment.
-
-## CRM Workspaces
-
-The CRM provides different workspaces according to staff role.
-
-Administrative functionality includes:
-
-- Dashboard
-- Leads
-- Customers
-- Tickets
-- Staff
-- Audit
-- Billing
-- Settings and Exports
-
-Technician functionality includes:
-
-- Dashboard
-- Leads
-- Customers
-- Billing
-- Settings
-
-### Administrator Dashboard
-
-![Golden Years administrator dashboard](screenshots/admin-dashboard.png)
-
-*The administrator dashboard provides a centralized view of lead volume, scheduling state, assignment needs, recent activity, and pipeline status.*
+![Golden Years customer ticket history](screenshots/customer-ticket-history.png)
 
 ### Lead Management
 
-![Golden Years lead management list](screenshots/lead-list.png)
+The CRM allows staff to inspect incoming requests and manage the information needed to move them toward service.
 
-*The lead workspace supports filtering by status, technician assignment, priority, active/archive state, and text search, along with CSV export and manual lead creation.*
+![Golden Years lead detail](screenshots/lead-detail-overview.png)
 
-Data visibility is determined by role and organizational scope rather than by simply hiding navigation links.
+Staff can update status, priority, technician assignment, and operational context.
 
-### Technician Workspace
+![Golden Years lead assignment controls](screenshots/lead-assignment-controls.png)
+
+The workflow preserves the relationship between the original lead, its service ticket, scheduling information, and any later customer profile.
+
+### Ticket Management
+
+Service tickets represent the operational case being worked by staff.
+
+Ticket controls manage scheduling, status, payment state, archival state, and visit outcomes.
+
+![Golden Years ticket workflow controls](screenshots/ticket-update-controls.png)
+
+The system distinguishes between a customer's requested appointment time and the confirmed working schedule so staff can coordinate a request before treating it as finalized.
+
+## CRM + Role-Based Access
+
+The CRM provides administrative and technician-specific workspaces.
+
+Administrative functionality includes:
+
+- dashboard and pipeline views
+- leads
+- customers
+- tickets
+- staff management
+- billing
+- audit history
+- settings and exports
+
+![Golden Years administrator dashboard](screenshots/admin-dashboard.png)
+
+Technicians receive a more limited workspace centered on assigned work, open visits, related customers, payments, and scheduling.
 
 ![Golden Years technician workspace](screenshots/technician-workspace.png)
 
-*Technicians receive a narrower operational workspace centered on their assigned work, open visits, payments, customer records, and scheduling rather than full-company administration.*
+The organizational model supports:
 
-## Realtime CRM Updates
+- owner
+- administrator
+- developer
+- regional manager
+- territory manager
+- technician
 
-The CRM uses Supabase Realtime subscriptions to respond to relevant PostgreSQL changes without requiring staff to manually refresh the application.
+![Golden Years staff roles and organizational scope](screenshots/staff-permissions-managers-technicians.png)
 
-Realtime behavior is coordinated with local editing state so incoming updates do not blindly overwrite a form while a staff member is actively working.
+Authentication is handled through Supabase Auth.
 
-This allows the internal application to stay responsive to changes made elsewhere while protecting in-progress user input.
+Authorization is enforced through PostgreSQL Row Level Security and server-side permission checks rather than relying on hidden navigation or disabled buttons.
 
-## Operational Utilities
+Access can depend on role, branch, territory, management relationship, technician assignment, and the record being accessed.
 
-The CRM also includes supporting tools for day-to-day business operations.
+The CRM also manages persisted sessions, expiry handling, session revalidation, logout cleanup, and first-login password-change behavior when configured.
 
-These include:
+Supabase Realtime subscriptions allow relevant database changes to appear without requiring staff to manually reload the application. Realtime refresh is coordinated with local form state so an incoming update does not blindly overwrite active edits.
 
-- searchable and filterable lead, customer, ticket, staff, billing, and audit views;
-- staff notifications tied to relevant records;
-- company and technician calendar views;
-- configurable technician calendar embeds;
-- customer and lead communication history;
-- lead, staff-directory, technician-performance, and individual-staff CSV exports; and
-- protections against spreadsheet formula injection in exported CSV data.
+## Integrations
 
-These utilities were designed to reduce the amount of operational information staff need to manage outside the CRM.
+### Google Calendar
 
-## Authentication + Authorization
-
-Staff authentication is handled through Supabase Auth.
-
-The CRM also manages session lifecycle behavior, including persisted browser sessions, automatic token refresh, expiry checks, revalidation when the application regains focus or visibility, and application-state cleanup during logout.
-
-The system also supports requiring a password change on first login when an account is configured that way.
-
-The application supports roles including:
-
-- owner;
-- administrator;
-- developer;
-- regional manager;
-- territory manager; and
-- technician.
-
-Authorization combines PostgreSQL Row Level Security with server-side permission checks.
-
-Access can depend on:
-
-- staff role;
-- branch;
-- territory;
-- management relationship;
-- technician assignment;
-- record relationship; and
-- notification recipient.
-
-Privileged internal-control tables and sensitive workflows remain inaccessible to ordinary browser roles.
-
-### Organizational Roles
-
-![Golden Years staff permissions and organizational roles](screenshots/staff-permissions-managers-technicians.png)
-
-*The staff directory reflects the application's organizational model across regional managers, territory managers, and technicians, with role and scope information represented directly in the CRM.*
-
-The frontend reflects permissions for usability, but frontend visibility is not treated as the security boundary.
-
-## Security + Data Protection
-
-Because the CRM processes customer and operational information, security controls were treated as architectural requirements rather than simply interface features.
-
-Implemented safeguards include:
-
-- authenticated staff access through Supabase Auth;
-- role- and assignment-aware PostgreSQL Row Level Security;
-- server-side authorization checks for privileged workflows;
-- separation of public and internal application functionality;
-- service-role isolation for privileged database operations;
-- server-side storage and use of integration secrets;
-- webhook-signature verification for external services;
-- server-side validation and normalization of public submissions;
-- layered abuse, replay, and duplicate-submission controls;
-- HTML escaping for user-provided content;
-- spreadsheet formula-injection mitigation for CSV exports;
-- validated external calendar embed URLs;
-- production Content Security Policy and browser security headers;
-- CRM `noindex` and restrictive caching behavior; and
-- hardened deployment output that publishes only approved public assets.
-
-Payment-card details are entered through Stripe-hosted components and are not stored directly by the application.
-
-The architecture uses defense-in-depth rather than assuming that hidden buttons or private-looking URLs are sufficient authorization controls.
-
-This case study intentionally describes security architecture at a high level and does not publish credentials, private infrastructure identifiers, sensitive policy details, internal routing information, or other information that would unnecessarily increase attack surface.
-
-## Google Calendar Integration
-
-Scheduling is synchronized around one authoritative company-calendar event per service case.
+Scheduling is synchronized around one authoritative company-calendar event for each service case.
 
 The integration supports:
 
-- tentative scheduling;
-- confirmed scheduling;
-- cancellation;
-- technician attendee synchronization;
-- manager attendee synchronization;
-- stored event references;
-- CRM/calendar reconciliation; and
-- retryable background synchronization.
+- tentative events
+- confirmed scheduling
+- cancellations
+- technician and manager attendees
+- updates to existing events
+- stored event references
+- retryable background synchronization
 
-When a record changes, the existing event can be patched instead of creating unrelated calendar copies.
+When a schedule changes, the application updates the existing event rather than intentionally creating a separate copy for every change.
 
-Stored event references and idempotency behavior help prevent duplicate event creation.
+If immediate synchronization fails, the desired state remains queued for retry.
 
-If immediate synchronization fails, the desired state remains in a durable integration queue and can be retried asynchronously.
+### Resend
 
-## Email Workflows
+Resend supports both automated and staff-triggered communication.
 
-Resend provides outbound and inbound email workflows.
+Implemented workflows include:
 
-Implemented flows include:
-
-- automatic business notification for a new service request;
-- automatic customer confirmation when an email is supplied;
-- staff-triggered email to leads and customers;
-- threaded replies;
-- review-request emails; and
-- inbound customer replies routed back into CRM history.
+- new-request notifications to the business
+- customer booking confirmations
+- staff email to leads and customers
+- threaded replies
+- review-request emails
+- inbound customer replies recorded in CRM history
 
 Inbound webhook requests are signature-verified.
 
-Messages are associated with the relevant service/customer record so communication can remain part of the operational history.
+### Stripe
 
-## Stripe + Payments
+The CRM implements Stripe Payment Intents using Stripe-hosted Elements.
 
-The CRM implements Stripe Payment Intents using Stripe Elements.
-
-Card details are handled through Stripe-hosted payment components and are not stored directly by the Golden Years application.
+Card details are entered through Stripe's payment interface and are not stored directly by the Golden Years application.
 
 The workflow includes:
 
-- payment-intent creation;
-- approved-amount validation;
-- payment reservations;
-- Stripe-side confirmation;
-- server-side payment verification;
-- webhook reconciliation;
-- local payment ledger records;
-- receipt generation;
-- CRM balance updates; and
-- refund reconciliation.
-
-### Billing Records
+- Payment Intent creation
+- approved-amount validation
+- payment reservations
+- server-side verification
+- webhook reconciliation
+- payment ledger records
+- receipt generation
+- CRM balance updates
+- refund reconciliation
 
 ![Golden Years billing and invoice management](screenshots/billing-invoices.png)
 
-*The billing workspace connects invoices and receipts to CRM records while preserving payment status, service line items, customer context, and document history.*
+Payment finalization uses transactional database logic so related payment, receipt, balance, and audit updates remain consistent.
 
-The case study uses fictional customer and payment information. Card-entry screens and external Stripe identifiers are intentionally not published.
+## Security + Reliability
 
-Payment finalization uses transactional database logic so related ledger, receipt, balance, and audit updates are committed together.
+Because the CRM processes customer and operational information, security and failure recovery were treated as architectural requirements.
 
-Refund initiation remains outside the CRM and is reconciled back into the application through Stripe webhooks.
+Implemented controls include:
 
-## Production Validation
+- authenticated staff access
+- PostgreSQL Row Level Security
+- server-side authorization for privileged operations
+- service-role isolation
+- server-side integration secrets
+- Stripe and Resend webhook signature verification
+- server-side input validation and normalization
+- abuse and replay protections on public intake
+- duplicate-submission controls
+- HTML escaping for user-provided content
+- spreadsheet formula-injection protection for CSV exports
+- restricted calendar embed URLs
+- Content Security Policy and other browser security headers
+- restrictive CRM indexing and caching behavior
+- allow-listed production deployment output
 
-Before launch, I performed real production smoke testing of the major integrated workflows.
+External integrations also use reliability mechanisms including:
 
-That testing included:
+- durable background jobs
+- retries with backoff
+- stale-job recovery
+- claim and generation controls
+- idempotency
+- database transactions
+- payment reservations
+- webhook reconciliation
 
-- successfully signing into the production CRM;
-- sending a real email through the production email workflow;
-- modifying the production Google Calendar through the application workflow; and
-- successfully charging my own card through the production Stripe integration.
-
-These tests were performed as part of deployment validation.
-
-They establish that the major integrations functioned end-to-end in production at launch; they are not intended as a claim that every external service has been continuously monitored or independently revalidated since deployment.
+For example, a scheduling update can remain saved in the CRM even if Google Calendar is temporarily unavailable. Calendar synchronization can then retry independently.
 
 ## Audit History
 
-The CRM maintains operational audit history for important records and actions.
+The CRM maintains operational history for important record and workflow changes.
 
-Audit entries can record:
-
-- timestamp;
-- actor;
-- role;
-- action type;
-- entity type;
-- entity identifier;
-- entity label; and
-- structured change details.
+Audit entries can include the actor, role, action, entity, timestamp, and structured change details.
 
 ![Golden Years CRM audit history](screenshots/audit-history.png)
 
-*Administrative users can search and inspect operational history for actions such as record changes, billing activity, deletions, notes, and status updates.*
+Administrative users can search and inspect this history inside the CRM.
 
-The screenshot above uses test data. Production audit records are not included in this public case study.
-
-The system is intentionally described as operational auditing rather than exhaustive security-event logging.
-
-## Reliability + Integration Recovery
-
-External systems can fail independently of the CRM.
-
-The application includes reliability mechanisms such as:
-
-- durable integration jobs;
-- exponential retries;
-- stale-job recovery;
-- worker claim tokens;
-- generation/version checks;
-- idempotency controls;
-- transactional database operations;
-- payment reservations; and
-- webhook reconciliation.
-
-For example, an appointment update can remain safely stored in the CRM even when Google Calendar is temporarily unavailable.
-
-Calendar synchronization can then retry separately rather than requiring staff to reconstruct the appointment manually.
+The system is described as operational auditing rather than exhaustive security-event logging.
 
 ## Accessibility
 
-Accessibility was a core product consideration because Golden Years primarily serves older adults and people who may be less comfortable using technology.
+Accessibility was especially important for this project because Golden Years primarily serves older adults and people who may be less comfortable with technology.
 
-That audience may also include people with visual, motor, cognitive, or other disabilities that can make poorly designed digital interfaces particularly difficult to use.
+That audience may also include customers with visual, motor, cognitive, or other disabilities that make inaccessible interfaces especially difficult to use.
 
-Implemented accessibility features include:
+Implemented accessibility work includes:
 
-- semantic form labels and structure;
-- skip-to-content navigation;
-- keyboard-accessible interactions;
-- visible keyboard focus states;
-- focus trapping in modal dialogs;
-- focus restoration after dialogs close;
-- Escape-key handling for modal interfaces;
-- explicit accessible dialog labeling;
-- `aria-live` regions for dynamic status and result updates;
-- accessible inline form and operation feedback;
-- reduced-motion support;
-- responsive layouts across desktop, tablet, and mobile sizes; and
-- clear, straightforward form and interface language.
+- semantic form labeling
+- skip-to-content navigation
+- keyboard-accessible interaction
+- visible focus states
+- modal focus trapping and restoration
+- Escape-key handling
+- accessible dialog labeling
+- `aria-live` regions for dynamic feedback
+- accessible inline status and error messaging
+- reduced-motion support
+- responsive layouts
+- straightforward interface language
 
-The goal was not simply to add accessibility attributes after development.
+Accessibility was considered as part of the product design rather than added only after implementation.
 
-The interface was designed to reduce friction for customers who may already find technology intimidating, unfamiliar, or physically difficult to navigate.
+The project does not currently claim formal WCAG 2.2 AA conformance. A future goal is to perform a structured WCAG 2.2 Level AA evaluation with automated and manual testing, keyboard review, assistive-technology testing, contrast and reflow evaluation, and remediation where needed.
 
-### Future Accessibility Evaluation
+## Testing + Production Validation
 
-Accessibility has been incorporated throughout the application, but the project has not yet undergone a formal WCAG conformance evaluation.
+Automated verification includes:
 
-A future goal is to complete a structured **WCAG 2.2 Level AA conformance evaluation**, including:
+- 28 Deno Edge Function tests
+- Edge Function type checking
+- PostgreSQL workflow tests
+- JavaScript syntax checks
+- HTML validation
+- build-script verification
+- Git whitespace checks
+- Supabase database linting
+- deployment-output checks
 
-- automated accessibility testing;
-- keyboard-only testing;
-- screen-reader and assistive-technology review;
-- color and contrast evaluation;
-- zoom and reflow testing;
-- form/error/status-message review;
-- manual evaluation of applicable WCAG success criteria; and
-- remediation of any issues identified.
+Test coverage includes public booking controls, email-template escaping, staff authorization scope, Calendar synchronization, attendee behavior, idempotency, error handling, and calendar configuration.
 
-The project does not currently claim formal WCAG 2.2 AA conformance.
+The project does not currently have complete automated browser end-to-end coverage.
 
-## Responsive Design
+Before launch, I also performed production smoke testing of the major integrated workflows.
 
-The application includes dedicated layouts and behavior for desktop, tablet, and mobile devices.
+That included:
 
-Responsive work includes:
+- signing into the production CRM
+- sending a real production email
+- modifying the production Google Calendar through the application
+- successfully charging my own card through the production Stripe integration
 
-- adaptive navigation;
-- stacked content layouts;
-- responsive CRM panels;
-- mobile-friendly forms;
-- constrained modal behavior;
-- schedule and dashboard adaptation; and
-- reduced-motion overrides.
-
-## Testing + Continuous Verification
-
-The repository contains automated verification across server functions, database workflows, frontend source, and deployment output.
-
-Current coverage includes:
-
-- 28 Deno Edge Function tests;
-- Edge Function type checking;
-- PostgreSQL workflow tests;
-- JavaScript syntax checks;
-- HTML validation;
-- shell/build-script verification;
-- Git whitespace checking;
-- Supabase database linting; and
-- deploy-output safety checks.
-
-Tested server behavior includes:
-
-- booking challenges;
-- public email-template escaping;
-- staff scope and authorization;
-- calendar attendee behavior;
-- calendar synchronization;
-- idempotency;
-- error handling;
-- calendar state recording; and
-- calendar embed validation.
-
-The project does not currently claim complete browser-based end-to-end automated test coverage.
-
-High-value future testing work would include automated browser flows for public booking and role-specific CRM workflows.
+These tests verified the major integrations end-to-end at deployment.
 
 ## Deployment
 
-The public website and authenticated CRM are deployed together through Netlify from a generated `dist/` directory rather than by exposing the project repository directly.
+The public site and CRM are hosted through Netlify using a generated `dist/` directory.
 
-The build process creates that deployment output from an explicit allow list of approved frontend files and assets.
+The production build publishes an explicit allow list of frontend files rather than exposing the repository itself.
 
-Database migrations and Supabase Edge Functions are deployed separately from the static frontend.
+Database migrations and Edge Functions are deployed separately through Supabase.
 
-Production configuration includes:
+I configured:
 
-- Netlify hosting and build configuration;
-- Supabase database migrations;
-- Supabase Edge Functions;
-- production environment configuration;
-- Google Calendar integration;
-- Resend integration;
-- Stripe integration;
-- DNS configuration; and
-- production domain behavior.
+- Netlify
+- Supabase
+- Resend
+- DNS
+- production-domain behavior
+- Google Workspace requirements for Calendar synchronization
+- application-side Stripe configuration
+- production secrets
 
-I configured the Netlify deployment, Supabase environment, Resend, DNS, production domain integration, Google Workspace requirements for Calendar synchronization, application-side Stripe integration, and production secrets.
+The deployment process intentionally excludes database files, environment configuration, and internal development artifacts from public output.
 
-This separation keeps frontend deployment, database changes, privileged server functions, and external-service configuration behind distinct production boundaries.
-
-## Deployment Hardening
-
-Because the production repository contains both public frontend assets and backend/database infrastructure, the repository root is not treated as deployable content.
-
-The build process:
-
-- creates a dedicated distribution directory;
-- copies only explicitly approved public assets;
-- excludes database and configuration artifacts;
-- excludes environment and internal tooling files;
-- verifies deployment output in CI; and
-- applies production security headers.
-
-This creates a deliberate boundary between source code and files that may be publicly served.
+CI also verifies that sensitive backend artifacts are not accidentally included in the deployable directory.
 
 ## Engineering Challenges
 
-### Preserving One Case Across the Lead + Customer Lifecycle
+### Preserving the Lead-to-Customer Lifecycle
 
-A service request needs to exist before the requester necessarily becomes a long-term customer.
+A service request needed to become a trackable case immediately without prematurely treating every requester as a durable customer.
 
-The final model creates a service ticket with the incoming lead immediately but delays customer-profile creation until an explicit conversion.
-
-This preserves the original service-case history while avoiding automatic customer matching based on potentially ambiguous shared contact information.
+The final design creates the ticket at intake and delays customer-profile creation until explicit conversion.
 
 ### Reliable Calendar Synchronization
 
-A database change and a Calendar API request cannot be treated as one atomic transaction.
+Database state and an external Calendar API cannot be updated as one atomic transaction.
 
-The application therefore combines:
+The solution combines immediate synchronization with stored event references, a durable desired-state queue, retries, worker claims, and idempotency controls.
 
-- immediate synchronization;
-- stored external event references;
-- a durable desired-state queue;
-- worker claims;
-- generation tracking;
-- retries; and
-- idempotency behavior.
+### Role-Aware Data Access
 
-This allows external synchronization to recover without discarding the CRM change that triggered it.
+Owners, managers, and technicians need different views of the same operational system.
 
-### Organizational Access Control
-
-The CRM must expose different records to owners, administrators, managers, and technicians.
-
-The implementation combines frontend role-aware interfaces with PostgreSQL Row Level Security and server-side access validation.
-
-This ensures the interface does not become the sole authorization boundary.
+The implementation combines role-aware frontend behavior with PostgreSQL RLS and server-side authorization so the UI is not the only access boundary.
 
 ### Safe Payment Finalization
 
-Payment touches both Stripe and multiple internal business records.
+A successful card payment affects Stripe and several internal CRM records.
 
-The implementation combines:
+The implementation combines reservations, amount validation, Stripe verification, webhook signatures, idempotency, database locking, and transactional finalization to reduce duplicate or inconsistent payment state.
 
-- payment reservations;
-- approved-amount matching;
-- Stripe Payment Intent metadata;
-- idempotency;
-- webhook verification;
-- database locking;
-- ledger uniqueness; and
-- transactional finalization.
+## Tradeoffs + Future Improvements
 
-This reduces the risk of duplicate payment handling or inconsistent CRM records.
+The frontend intentionally uses vanilla JavaScript rather than a frontend framework or bundler.
 
-### Reliable Public Intake
+That kept deployment simple, but the CRM's primary JavaScript module became large and now handles state, rendering, authentication, data access, and workflows in one place.
 
-A public booking form cannot safely behave like an unrestricted database insert.
+If I were restructuring the frontend today, modularizing those responsibilities would be a priority.
 
-The intake path includes:
+Other future improvements include:
 
-- server-side validation;
-- normalization;
-- consent capture;
-- replay protection;
-- abuse controls;
-- throttling;
-- duplicate suppression; and
-- durable downstream email/calendar jobs.
-
-### Safe Static Deployment
-
-The application repository contains files that should never be publicly hosted.
-
-The deployment process therefore uses explicit public-file allow-listing and CI verification rather than publishing the source repository directly.
-
-## Technical Tradeoffs
-
-The frontend intentionally uses vanilla JavaScript without a frontend framework or build pipeline.
-
-That reduces deployment complexity and keeps the browser application lightweight.
-
-The tradeoff is that the CRM's primary JavaScript module has grown substantially and now combines:
-
-- shared application state;
-- rendering;
-- authentication;
-- data access;
-- event handling; and
-- workflow logic.
-
-If I were restructuring the frontend today, modularizing those responsibilities would be one of my first architectural improvements.
-
-Other current tradeoffs include:
-
-- technician lead permissions are primarily row-scoped rather than field-scoped;
-- staff-email delivery and message logging can experience a rare partial failure;
-- there is no formal scheduling-conflict engine;
-- browser-based end-to-end automation has not yet been added; and
-- application observability relies primarily on platform/function logs and database job errors rather than a dedicated monitoring service.
-
-These limitations are useful future engineering targets rather than hidden weaknesses.
-
-## Future Improvements
-
-High-value future improvements include:
-
-- modularizing the CRM frontend;
-- automated browser end-to-end testing;
-- expanded role and RLS mutation testing;
-- structured WCAG 2.2 AA conformance evaluation;
-- automated accessibility regression testing;
-- additional external-service integration tests;
-- dedicated application observability;
-- reconciliation tooling for rare partial integration failures;
-- additional scheduling-conflict detection;
-- expanded administrative reporting; and
-- additional workflow automation.
+- browser-based end-to-end tests
+- expanded RLS and role-mutation testing
+- formal WCAG 2.2 AA conformance evaluation
+- automated accessibility regression testing
+- stronger application observability
+- reconciliation tooling for rare integration failures
+- scheduling-conflict detection
+- additional reporting and workflow automation
 
 ## Source Availability
 
 Production source code is intentionally private.
 
-The application contains proprietary business workflows, customer-facing systems, internal operational functionality, security-sensitive configuration, and integrations with external business services.
+The application contains proprietary business workflows, internal operational functionality, security-sensitive configuration, and integrations with external business services.
 
-Keeping the production repository private is a deliberate client-confidentiality and security decision.
-
-This case study exists to provide technical visibility into the system without exposing information that should remain private.
+Keeping that repository private protects client confidentiality and the production system while this case study provides public technical visibility into the work.
